@@ -70,6 +70,7 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
+    lawyers: Lawyer;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -86,6 +87,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    lawyers: LawyersSelect<false> | LawyersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -189,7 +191,18 @@ export interface Page {
       | null;
     media?: (string | null) | Media;
   };
-  layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
+  layout: (
+    | CallToActionBlock
+    | ContentBlock
+    | MediaBlock
+    | ArchiveBlock
+    | FormBlock
+    | {
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'searchLawyerBlock';
+      }
+  )[];
   meta?: {
     title?: string | null;
     /**
@@ -726,6 +739,27 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lawyers".
+ */
+export interface Lawyer {
+  id: string;
+  name: string;
+  location: string;
+  experience: number;
+  rating: number;
+  hourlyRate: string;
+  reviews: number;
+  specialties?:
+    | {
+        specialty?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -917,6 +951,10 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
+        relationTo: 'lawyers';
+        value: string | Lawyer;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -1014,6 +1052,12 @@ export interface PagesSelect<T extends boolean = true> {
         mediaBlock?: T | MediaBlockSelect<T>;
         archive?: T | ArchiveBlockSelect<T>;
         formBlock?: T | FormBlockSelect<T>;
+        searchLawyerBlock?:
+          | T
+          | {
+              id?: T;
+              blockName?: T;
+            };
       };
   meta?:
     | T
@@ -1272,6 +1316,26 @@ export interface UsersSelect<T extends boolean = true> {
   hash?: T;
   loginAttempts?: T;
   lockUntil?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lawyers_select".
+ */
+export interface LawyersSelect<T extends boolean = true> {
+  name?: T;
+  location?: T;
+  experience?: T;
+  rating?: T;
+  hourlyRate?: T;
+  reviews?: T;
+  specialties?:
+    | T
+    | {
+        specialty?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

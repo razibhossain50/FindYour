@@ -7,6 +7,7 @@ import { CallToActionBlock } from '@/blocks/CallToAction/Component'
 import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
+import { SearchLawyerBlock } from '@/blocks/SearchLawyerBlock/Component'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -14,12 +15,15 @@ const blockComponents = {
   cta: CallToActionBlock,
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
+  searchLawyerBlock: SearchLawyerBlock,
 }
 
 export const RenderBlocks: React.FC<{
   blocks: Page['layout'][0][]
 }> = (props) => {
   const { blocks } = props
+
+  console.log('Blocks:', blocks);
 
   const hasBlocks = blocks && Array.isArray(blocks) && blocks.length > 0
 
@@ -28,18 +32,22 @@ export const RenderBlocks: React.FC<{
       <Fragment>
         {blocks.map((block, index) => {
           const { blockType } = block
+          console.log('Rendering block type:', blockType);
 
           if (blockType && blockType in blockComponents) {
             const Block = blockComponents[blockType]
 
             if (Block) {
+              console.log(`Rendering component for block type: ${blockType}`);
               return (
-                <div className="my-16" key={index}>
+                <div className="" key={index}>
                   {/* @ts-expect-error there may be some mismatch between the expected types here */}
                   <Block {...block} disableInnerContainer />
                 </div>
               )
             }
+          } else {
+            console.log(`Block type ${blockType} not found in blockComponents`);
           }
           return null
         })}
