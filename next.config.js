@@ -17,7 +17,12 @@ const nextConfig = {
           hostname: url.hostname,
           protocol: url.protocol.replace(':', ''),
         }
-      }),
+      },
+    ),
+    {
+      hostname: 'fastly.picsum.photos',
+      protocol: 'https',
+    },
     ],
   },
   reactStrictMode: true,

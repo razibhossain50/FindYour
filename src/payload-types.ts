@@ -70,7 +70,7 @@ export interface Config {
     media: Media;
     categories: Category;
     users: User;
-    lawyers: Lawyer;
+    'lawyers-profile': LawyersProfile;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -87,7 +87,7 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    lawyers: LawyersSelect<false> | LawyersSelect<true>;
+    'lawyers-profile': LawyersProfileSelect<false> | LawyersProfileSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -739,19 +739,32 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lawyers".
+ * via the `definition` "lawyers-profile".
  */
-export interface Lawyer {
+export interface LawyersProfile {
   id: string;
-  name: string;
-  location: string;
-  experience: number;
-  rating: number;
-  hourlyRate: string;
-  reviews: number;
-  specialties?:
+  profile_picture?: (string | null) | Media;
+  full_name: string;
+  designation: string;
+  location: {
+    country: string;
+    division: string;
+    district: string;
+    upazila: string;
+  };
+  email: string;
+  mobile_number: string;
+  years_of_experience: number;
+  specialization?:
     | {
-        specialty?: string | null;
+        field?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  availability?:
+    | {
+        date: string;
+        time: string;
         id?: string | null;
       }[]
     | null;
@@ -951,8 +964,8 @@ export interface PayloadLockedDocument {
         value: string | User;
       } | null)
     | ({
-        relationTo: 'lawyers';
-        value: string | Lawyer;
+        relationTo: 'lawyers-profile';
+        value: string | LawyersProfile;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1319,19 +1332,34 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "lawyers_select".
+ * via the `definition` "lawyers-profile_select".
  */
-export interface LawyersSelect<T extends boolean = true> {
-  name?: T;
-  location?: T;
-  experience?: T;
-  rating?: T;
-  hourlyRate?: T;
-  reviews?: T;
-  specialties?:
+export interface LawyersProfileSelect<T extends boolean = true> {
+  profile_picture?: T;
+  full_name?: T;
+  designation?: T;
+  location?:
     | T
     | {
-        specialty?: T;
+        country?: T;
+        division?: T;
+        district?: T;
+        upazila?: T;
+      };
+  email?: T;
+  mobile_number?: T;
+  years_of_experience?: T;
+  specialization?:
+    | T
+    | {
+        field?: T;
+        id?: T;
+      };
+  availability?:
+    | T
+    | {
+        date?: T;
+        time?: T;
         id?: T;
       };
   updatedAt?: T;

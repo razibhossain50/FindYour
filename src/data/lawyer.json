@@ -1,0 +1,81 @@
+[
+    {
+      "id": 1,
+      "profile_picture": "https://picsum.photos/240/240",
+      "full_name": "Sarah Johnson",
+      "designation": "Senior Corporate Lawyer",
+      "location": {
+        "country": "Bangladesh",
+        "division": "Dhaka Division",
+        "district": "Dhaka",
+        "upazila": "Gulshan"
+      },
+      "email": "sarah.johnson@example.com",
+      "mobile_number": "+8801712345678",
+      "years_of_experience": 8,
+      "specialization": ["Corporate Law", "Intellectual Property"],
+      "availability": [
+        {
+          "date": "2025-02-19",
+          "time": "10:00 AM - 12:00 PM"
+        },
+        {
+          "date": "2025-02-20",
+          "time": "02:00 PM - 05:00 PM"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "profile_picture": "https://picsum.photos/240/240",
+      "full_name": "Michael Chen",
+      "designation": "Criminal Defense Lawyer",
+      "location": {
+        "country": "Bangladesh",
+        "division": "Chittagong Division",
+        "district": "Chittagong",
+        "upazila": "Pahartali"
+      },
+      "email": "michael.chen@example.com",
+      "mobile_number": "+8801812345679",
+      "years_of_experience": 12,
+      "specialization": ["Family Law", "Criminal Law"],
+      "availability": [
+        {
+          "date": "2025-02-19",
+          "time": "09:00 AM - 11:00 AM"
+        },
+        {
+          "date": "2025-02-21",
+          "time": "03:00 PM - 06:00 PM"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "profile_picture": "https://picsum.photos/240/240",
+      "full_name": "Emma Thompson",
+      "designation": "Employment and Civil Rights Lawyer",
+      "location": {
+        "country": "Bangladesh",
+        "division": "Sylhet Division",
+        "district": "Sylhet",
+        "upazila": "Zindabazar"
+      },
+      "email": "emma.thompson@example.com",
+      "mobile_number": "+8801912345680",
+      "years_of_experience": 6,
+      "specialization": ["Employment Law", "Civil Rights"],
+      "availability": [
+        {
+          "date": "2025-02-20",
+          "time": "11:00 AM - 01:00 PM"
+        },
+        {
+          "date": "2025-02-22",
+          "time": "04:00 PM - 07:00 PM"
+        }
+      ]
+    }
+  ]
+  

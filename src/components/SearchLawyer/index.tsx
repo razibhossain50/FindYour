@@ -1,25 +1,77 @@
-
 "use client"
-import { useState, useMemo } from 'react';
-import { Star, MapPin, Phone, Mail, Briefcase, Clock } from 'lucide-react';
+import { useState, useMemo, useEffect } from 'react';
+import { Star, MapPin, Phone, Mail, Briefcase, Clock, Award} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+
+interface Availability {
+  date: string;
+  time: string;
+}
+
+interface Location {
+  country: string;
+  division: string;
+  district: string;
+  upazila: string;
+}
+
+interface Lawyer {
+  id: string;
+  full_name: string;
+  designation: string;
+  profile_picture: string;
+  location: Location;
+  email: string;
+  mobile_number: string;
+  years_of_experience: number;
+  specialization: string[];
+  availability: Availability[];
+}
 
 export interface SearchFilters {
   country: string;
   division: string;
-  District: string;
-  upazilla: string;
+  district: string;
+  upazila: string;
 }
 
 export const SearchLawyer = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [lawyers, setLawyers] = useState<Lawyer[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filters, setFilters] = useState<SearchFilters>({
     country: '',
     division: '',
-    District: '',
-    upazilla: '',
+    district: '',
+    upazila: '',
   });
   const lawyersPerPage = 6;
+
+  // Fetch lawyers from Payload API
+  useEffect(() => {
+    const fetchLawyers = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_SERVER_URL}/api/lawyers-profile`);        
+        if (!response.ok) {
+          throw new Error(`API call failed: ${response.status} ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        // Adjust this based on your Payload API response structure
+        // Payload typically returns data in a docs array within the response
+        setLawyers(data.docs || data);
+        setLoading(false);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch lawyers');
+        setLoading(false);
+        console.error('Error fetching lawyers:', err);
+      }
+    };
+
+    fetchLawyers();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -31,16 +83,12 @@ export const SearchLawyer = () => {
     setCurrentPage(1);
   };
 
-  const lawyers = [
-    { id: 1, name: 'Sarah Johnson', location: 'Dhaka, Bangladesh', experience: 8, rating: 4.8, hourlyRate: '200-300', reviews: 278, specialties: ['Corporate Law', 'Intellectual Property'] },
-    { id: 2, name: 'Michael Chen', location: 'Chittagong, Bangladesh', experience: 12, rating: 4.9, hourlyRate: '250-350', reviews: 342, specialties: ['Family Law', 'Criminal Law'] },
-    { id: 3, name: 'Emma Thompson', location: 'Sylhet, Bangladesh', experience: 6, rating: 4.6, hourlyRate: '150-250', reviews: 156, specialties: ['Employment Law', 'Civil Rights'] },
-  ];
-
   const filteredLawyers = useMemo(() => {
-    return lawyers.filter(lawyer =>
-      (!filters.division || lawyer.location.toLowerCase().includes(filters.division.toLowerCase())) &&
-      (!filters.District || lawyer.location.toLowerCase().includes(filters.District.toLowerCase()))
+    return lawyers.filter(lawyer => 
+      (!filters.country || lawyer.location.country.toLowerCase().includes(filters.country.toLowerCase())) &&
+      (!filters.division || lawyer.location.division.toLowerCase().includes(filters.division.toLowerCase())) &&
+      (!filters.district || lawyer.location.district.toLowerCase().includes(filters.district.toLowerCase())) &&
+      (!filters.upazila || lawyer.location.upazila.toLowerCase().includes(filters.upazila.toLowerCase()))
     );
   }, [lawyers, filters]);
 
@@ -49,18 +97,35 @@ export const SearchLawyer = () => {
   const indexOfFirstLawyer = indexOfLastLawyer - lawyersPerPage;
   const currentLawyers = filteredLawyers.slice(indexOfFirstLawyer, indexOfLastLawyer);
 
+  const formatLocation = (location: Location) => {
+    return `${location.upazila}, ${location.district}, ${location.division}`;
+  };
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-64">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+    </div>;
+  }
+
+  if (error) {
+    return <div className="text-center p-8 text-red-600">
+      <h3 className="text-xl font-semibold mb-2">Error Loading Lawyers</h3>
+      <p>{error}</p>
+    </div>;
+  }
+
   return (
     <div className="py-12">
       <div className="text-center mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Find the Right Legal Expert</h1>
         <p className="text-lg text-gray-600">Connect with experienced lawyers who can help you navigate your legal challenges</p>
       </div>
-
+      
       <Card className="mb-8">
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {['country', 'division', 'District', 'upazilla'].map((field) => (
+              {Object.keys(filters).map((field) => (
                 <div key={field} className="relative">
                   <select
                     name={field}
@@ -70,8 +135,14 @@ export const SearchLawyer = () => {
                   >
                     <option value="">{`Select ${field.charAt(0).toUpperCase() + field.slice(1)}`}</option>
                     {field === 'country' && <option value="bangladesh">Bangladesh</option>}
-                    {field === 'division' && ['Dhaka', 'Chittagong', 'Sylhet'].map(div => (
+                    {field === 'division' && ['Dhaka Division', 'Chittagong Division', 'Sylhet Division'].map(div => (
                       <option key={div} value={div.toLowerCase()}>{div}</option>
+                    ))}
+                    {field === 'district' && ['Dhaka', 'Chittagong', 'Sylhet'].map(dist => (
+                      <option key={dist} value={dist.toLowerCase()}>{dist}</option>
+                    ))}
+                    {field === 'upazila' && ['Gulshan', 'Pahartali', 'Zindabazar'].map(upz => (
+                      <option key={upz} value={upz.toLowerCase()}>{upz}</option>
                     ))}
                   </select>
                 </div>
@@ -91,50 +162,65 @@ export const SearchLawyer = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {currentLawyers.map(lawyer => (
-          <Card key={lawyer.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-200">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">{lawyer.name}</h3>
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <MapPin className="h-4 w-4 mr-2" />
-                    <span>{lawyer.location}</span>
+          <div key={lawyer.id} className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="bg-card p-6 flex flex-col items-center">
+              <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-white mb-4">
+                <img
+                  src={lawyer.profile_picture.sizes.thumbnail.url}
+                  alt="Profile picture"
+                />
+              </div>
+              <h1 className="text-xl font-bold text-gray-700">{lawyer.full_name}</h1>
+              <p className="text-gray-700">{lawyer.designation}</p>
+            </div>
+            
+            <div className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center">
+                  <MapPin className="h-5 w-5 text-blue-500 mr-3" />
+                  <span className="text-gray-700">{formatLocation(lawyer.location)}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <Mail className="h-5 w-5 text-blue-500 mr-3" />
+                  <span className="text-gray-700">{lawyer.email}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <Phone className="h-5 w-5 text-blue-500 mr-3" />
+                  <span className="text-gray-700">{lawyer.mobile_number}</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <Award className="h-5 w-5 text-blue-500 mr-3" />
+                  <span className="text-gray-700">{lawyer.years_of_experience} Years of Experience</span>
+                </div>
+                
+                <div className="flex items-center">
+                  <Briefcase className="h-5 w-5 text-blue-500 mr-3" />
+                  <span className="text-gray-700">Specialization: {lawyer.specialization.join(", ")}</span>
+                </div>
+                
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-start">
+                    <Clock className="h-5 w-5 text-blue-500 mr-3 mt-1" />
+                    <div>
+                      <h3 className="text-sm font-medium text-gray-900">Availability</h3>
+                      {lawyer.availability.map((slot, index) => (
+                        <p key={index} className="text-sm text-gray-500">{slot.date}: {slot.time}</p>
+                      ))}
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center bg-blue-50 px-3 py-1 rounded-full">
-                  <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                  <span className="font-semibold">{lawyer.rating}</span>
-                  <span className="text-gray-500 text-sm ml-1">({lawyer.reviews})</span>
-                </div>
               </div>
-
-              <div className="space-y-2 mb-4">
-                <div className="flex items-center text-gray-600">
-                  <Briefcase className="h-4 w-4 mr-2" />
-                  <span>{lawyer.experience} years experience</span>
-                </div>
-                <div className="flex items-center text-gray-600">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>${lawyer.hourlyRate}/hour</span>
-                </div>
+              
+              <div className="mt-6">
+                <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition duration-300">
+                  Schedule Consultation
+                </button>
               </div>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {lawyer.specialties.map(specialty => (
-                  <span
-                    key={specialty}
-                    className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm"
-                  >
-                    {specialty}
-                  </span>
-                ))}
-              </div>
-
-              <button className="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold">
-                Contact Now
-              </button>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         ))}
       </div>
 
