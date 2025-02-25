@@ -2,6 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Star, MapPin, Phone, Mail, Briefcase, Clock, Award} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
+import GeoLocationData from '../../data/geo-location-bd.json' assert { type: 'json' };
 
 interface Availability {
   date: string;
@@ -35,6 +36,19 @@ export interface SearchFilters {
   upazila: string;
 }
 
+interface GeoLocationType {
+  country: string;
+  divisions: {
+    name: string;
+    districts: {
+      name: string;
+      upazilas: string[];
+    }[];
+  }[];
+}
+
+const GeoLocation = GeoLocationData[0] as GeoLocationType;
+
 export const SearchLawyer = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [lawyers, setLawyers] = useState<Lawyer[]>([]);
@@ -46,6 +60,7 @@ export const SearchLawyer = () => {
     district: '',
     upazila: '',
   });
+  const [filteredLawyers, setFilteredLawyers] = useState<Lawyer[]>([]);
   const lawyersPerPage = 6;
 
   // Fetch lawyers from Payload API
@@ -75,22 +90,89 @@ export const SearchLawyer = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFilters(prev => ({ ...prev, [name]: value }));
+    setFilters(prev => {
+      const newFilters = { ...prev, [name]: value };
+      
+      // Reset dependent fields when parent field changes
+      if (name === 'country') {
+        newFilters.division = '';
+        newFilters.district = '';
+        newFilters.upazila = '';
+      } else if (name === 'division') {
+        newFilters.district = '';
+        newFilters.upazila = '';
+      } else if (name === 'district') {
+        newFilters.upazila = '';
+      }
+      
+      return newFilters;
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setCurrentPage(1);
+
+    // Create filtered array based on selected filters
+    const filtered = lawyers.filter(lawyer => {
+      // If no filters are selected, show all lawyers
+      if (!filters.country && !filters.division && !filters.district && !filters.upazila) {
+        return true;
+      }
+
+      // Check each filter level
+      if (filters.country && lawyer.location.country.toLowerCase() !== filters.country.toLowerCase()) {
+        return false;
+      }
+
+      if (filters.division && lawyer.location.division.toLowerCase() !== filters.division.toLowerCase()) {
+        return false;
+      }
+
+      if (filters.district && lawyer.location.district.toLowerCase() !== filters.district.toLowerCase()) {
+        return false;
+      }
+
+      if (filters.upazila && lawyer.location.upazila.toLowerCase() !== filters.upazila.toLowerCase()) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Update filtered lawyers state
+    setFilteredLawyers(filtered);
   };
 
-  const filteredLawyers = useMemo(() => {
-    return lawyers.filter(lawyer => 
-      (!filters.country || lawyer.location.country.toLowerCase().includes(filters.country.toLowerCase())) &&
-      (!filters.division || lawyer.location.division.toLowerCase().includes(filters.division.toLowerCase())) &&
-      (!filters.district || lawyer.location.district.toLowerCase().includes(filters.district.toLowerCase())) &&
-      (!filters.upazila || lawyer.location.upazila.toLowerCase().includes(filters.upazila.toLowerCase()))
+  // Add this useEffect to initialize filteredLawyers when lawyers are first loaded
+  useEffect(() => {
+    setFilteredLawyers(lawyers);
+  }, [lawyers]);
+
+  const getCountries = () => {
+    return [GeoLocation.country];
+  };
+
+  const getDivisions = () => {
+    return GeoLocation.divisions.map(div => div.name);
+  };
+
+  const getDistricts = (division: string) => {
+    const selectedDivision = GeoLocation.divisions.find(
+      div => div.name.toLowerCase() === division.toLowerCase()
     );
-  }, [lawyers, filters]);
+    return selectedDivision ? selectedDivision.districts.map(dist => dist.name) : [];
+  };
+
+  const getUpazilas = (division: string, district: string) => {
+    const selectedDivision = GeoLocation.divisions.find(
+      div => div.name.toLowerCase() === division.toLowerCase()
+    );
+    const selectedDistrict = selectedDivision?.districts.find(
+      dist => dist.name.toLowerCase() === district.toLowerCase()
+    );
+    return selectedDistrict ? selectedDistrict.upazilas : [];
+  };
 
   const totalPages = Math.ceil(filteredLawyers.length / lawyersPerPage);
   const indexOfLastLawyer = currentPage * lawyersPerPage;
@@ -125,28 +207,72 @@ export const SearchLawyer = () => {
         <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {Object.keys(filters).map((field) => (
-                <div key={field} className="relative">
-                  <select
-                    name={field}
-                    value={filters[field as keyof SearchFilters]}
-                    onChange={handleChange}
-                    className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
-                  >
-                    <option value="">{`Select ${field.charAt(0).toUpperCase() + field.slice(1)}`}</option>
-                    {field === 'country' && <option value="bangladesh">Bangladesh</option>}
-                    {field === 'division' && ['Dhaka Division', 'Chittagong Division', 'Sylhet Division'].map(div => (
-                      <option key={div} value={div.toLowerCase()}>{div}</option>
-                    ))}
-                    {field === 'district' && ['Dhaka', 'Chittagong', 'Sylhet'].map(dist => (
-                      <option key={dist} value={dist.toLowerCase()}>{dist}</option>
-                    ))}
-                    {field === 'upazila' && ['Gulshan', 'Pahartali', 'Zindabazar'].map(upz => (
-                      <option key={upz} value={upz.toLowerCase()}>{upz}</option>
-                    ))}
-                  </select>
-                </div>
-              ))}
+              <div className="relative">
+                <select
+                  name="country"
+                  value={filters.country}
+                  onChange={handleChange}
+                  className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">Select Country</option>
+                  {getCountries().map(country => (
+                    <option key={country} value={country.toLowerCase()}>
+                      {country}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <select
+                  name="division"
+                  value={filters.division}
+                  onChange={handleChange}
+                  disabled={!filters.country}
+                  className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">Select Division</option>
+                  {getDivisions().map(division => (
+                    <option key={division} value={division.toLowerCase()}>
+                      {division}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <select
+                  name="district"
+                  value={filters.district}
+                  onChange={handleChange}
+                  disabled={!filters.division}
+                  className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">Select District</option>
+                  {getDistricts(filters.division).map(district => (
+                    <option key={district} value={district.toLowerCase()}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="relative">
+                <select
+                  name="upazila"
+                  value={filters.upazila}
+                  onChange={handleChange}
+                  disabled={!filters.district}
+                  className="w-full h-12 px-4 border border-gray-300 rounded-lg bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
+                >
+                  <option value="">Select Upazila</option>
+                  {getUpazilas(filters.division, filters.district).map(upazila => (
+                    <option key={upazila} value={upazila.toLowerCase()}>
+                      {upazila}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             <div className="flex justify-center">
               <button

@@ -63,6 +63,7 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
+    'regular-users': RegularUserAuthOperations;
   };
   collections: {
     pages: Page;
@@ -71,6 +72,7 @@ export interface Config {
     categories: Category;
     users: User;
     'lawyers-profile': LawyersProfile;
+    'regular-users': RegularUser;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -88,6 +90,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'lawyers-profile': LawyersProfileSelect<false> | LawyersProfileSelect<true>;
+    'regular-users': RegularUsersSelect<false> | RegularUsersSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -109,9 +112,13 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
-  user: User & {
-    collection: 'users';
-  };
+  user:
+    | (User & {
+        collection: 'users';
+      })
+    | (RegularUser & {
+        collection: 'regular-users';
+      });
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -124,6 +131,24 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
+  forgotPassword: {
+    email: string;
+    password: string;
+  };
+  login: {
+    email: string;
+    password: string;
+  };
+  registerFirstUser: {
+    email: string;
+    password: string;
+  };
+  unlock: {
+    email: string;
+    password: string;
+  };
+}
+export interface RegularUserAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -202,6 +227,7 @@ export interface Page {
         blockName?: string | null;
         blockType: 'searchLawyerBlock';
       }
+    | LoginSignupBlock
   )[];
   meta?: {
     title?: string | null;
@@ -739,6 +765,17 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LoginSignupBlock".
+ */
+export interface LoginSignupBlock {
+  title: string;
+  description?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'loginSignup';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "lawyers-profile".
  */
 export interface LawyersProfile {
@@ -770,6 +807,26 @@ export interface LawyersProfile {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regular-users".
+ */
+export interface RegularUser {
+  id: string;
+  fullName: string;
+  password: string | null;
+  role?: ('user' | 'admin') | null;
+  isVerified?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -968,6 +1025,10 @@ export interface PayloadLockedDocument {
         value: string | LawyersProfile;
       } | null)
     | ({
+        relationTo: 'regular-users';
+        value: string | RegularUser;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -988,10 +1049,15 @@ export interface PayloadLockedDocument {
         value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'regular-users';
+        value: string | RegularUser;
+      };
   updatedAt: string;
   createdAt: string;
 }
@@ -1001,10 +1067,15 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user: {
-    relationTo: 'users';
-    value: string | User;
-  };
+  user:
+    | {
+        relationTo: 'users';
+        value: string | User;
+      }
+    | {
+        relationTo: 'regular-users';
+        value: string | RegularUser;
+      };
   key?: string | null;
   value?:
     | {
@@ -1071,6 +1142,7 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
+        loginSignup?: T | LoginSignupBlockSelect<T>;
       };
   meta?:
     | T
@@ -1167,6 +1239,16 @@ export interface FormBlockSelect<T extends boolean = true> {
   form?: T;
   enableIntro?: T;
   introContent?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LoginSignupBlock_select".
+ */
+export interface LoginSignupBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
   id?: T;
   blockName?: T;
 }
@@ -1364,6 +1446,25 @@ export interface LawyersProfileSelect<T extends boolean = true> {
       };
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regular-users_select".
+ */
+export interface RegularUsersSelect<T extends boolean = true> {
+  fullName?: T;
+  password?: T;
+  role?: T;
+  isVerified?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  email?: T;
+  resetPasswordToken?: T;
+  resetPasswordExpiration?: T;
+  salt?: T;
+  hash?: T;
+  loginAttempts?: T;
+  lockUntil?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

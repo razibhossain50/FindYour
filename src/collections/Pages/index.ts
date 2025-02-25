@@ -8,6 +8,7 @@ import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { SearchLawyerBlock } from '../../blocks/SearchLawyerBlock/config'
+import { LoginSignup } from '../../blocks/LoginSignup/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -76,7 +77,7 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, SearchLawyerBlock],
+              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, SearchLawyerBlock, LoginSignup],
               required: true,
               admin: {
                 initCollapsed: true,
