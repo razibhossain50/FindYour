@@ -16,26 +16,20 @@ export const LoginForm = () => {
     setError('')
     
     try {
-      console.log('Attempting login with:', formData.email) // Debug log
-      const result = await payloadClient.login({
-        collection: 'regular-users',
-        data: {
-          email: formData.email.toLowerCase().trim(), // Normalize email
-          password: formData.password,
-        },
-        depth: 1,
+      const result = await payloadClient.regularLogin({
+        email: formData.email.toLowerCase().trim(),
+        password: formData.password,
       })
       
-      if (result?.token) {
-        console.log('Login successful, token received') // Debug log
-        router.push('/')
+      if (result?.user) {
+        console.log('Login successful:', result)
+        router.push('/profile')
         router.refresh()
       } else {
-        console.log('Login failed, no token received') // Debug log
         setError('Login failed. Please check your credentials.')
       }
     } catch (err: any) {
-      console.error('Login error details:', err) // Detailed error log
+      console.error('Login error:', err)
       setError(err?.response?.data?.message || 'Login failed. Please try again.')
     }
   }

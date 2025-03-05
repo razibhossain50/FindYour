@@ -227,7 +227,8 @@ export interface Page {
         blockName?: string | null;
         blockType: 'searchLawyerBlock';
       }
-    | LoginSignupBlock
+    | RegularUserLoginBlock
+    | RegularUserRegisterBlock
   )[];
   meta?: {
     title?: string | null;
@@ -765,14 +766,25 @@ export interface Form {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LoginSignupBlock".
+ * via the `definition` "RegularUserLoginBlock".
  */
-export interface LoginSignupBlock {
-  title: string;
+export interface RegularUserLoginBlock {
+  title?: string | null;
   description?: string | null;
   id?: string | null;
   blockName?: string | null;
-  blockType: 'loginSignup';
+  blockType: 'regularUserLogin';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RegularUserRegisterBlock".
+ */
+export interface RegularUserRegisterBlock {
+  title?: string | null;
+  description?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'regularUserRegister';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -815,9 +827,7 @@ export interface LawyersProfile {
 export interface RegularUser {
   id: string;
   fullName: string;
-  password: string | null;
-  role?: ('user' | 'admin') | null;
-  isVerified?: boolean | null;
+  role: 'user' | 'admin';
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -827,6 +837,7 @@ export interface RegularUser {
   hash?: string | null;
   loginAttempts?: number | null;
   lockUntil?: string | null;
+  password?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1142,7 +1153,8 @@ export interface PagesSelect<T extends boolean = true> {
               id?: T;
               blockName?: T;
             };
-        loginSignup?: T | LoginSignupBlockSelect<T>;
+        regularUserLogin?: T | RegularUserLoginBlockSelect<T>;
+        regularUserRegister?: T | RegularUserRegisterBlockSelect<T>;
       };
   meta?:
     | T
@@ -1244,9 +1256,19 @@ export interface FormBlockSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LoginSignupBlock_select".
+ * via the `definition` "RegularUserLoginBlock_select".
  */
-export interface LoginSignupBlockSelect<T extends boolean = true> {
+export interface RegularUserLoginBlockSelect<T extends boolean = true> {
+  title?: T;
+  description?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RegularUserRegisterBlock_select".
+ */
+export interface RegularUserRegisterBlockSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   id?: T;
@@ -1453,9 +1475,7 @@ export interface LawyersProfileSelect<T extends boolean = true> {
  */
 export interface RegularUsersSelect<T extends boolean = true> {
   fullName?: T;
-  password?: T;
   role?: T;
-  isVerified?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;

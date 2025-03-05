@@ -2,7 +2,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { Star, MapPin, Phone, Mail, Briefcase, Clock, Award} from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
-import GeoLocationData from '../../data/geo-location-bd.json' assert { type: 'json' };
+import GeoLocationData from '../../api/geo-location-bd.json' assert { type: 'json' };
 
 interface Availability {
   date: string;

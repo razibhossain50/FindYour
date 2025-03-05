@@ -101,3 +101,25 @@ html[data-theme='dark'],
 html[data-theme='light'] {
   opacity: initial;
 }
+
+
+@layer components{
+  /* lawyer profile component */
+  laywer-profile .form-input {
+    @apply block w-full px-4 py-3 rounded-lg border-2 border-gray-200 
+    focus:border-indigo-500 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 
+    transition-all duration-300;
+  }
+  
+  laywer-profile .form-group {
+    @apply relative;
+  }
+  
+  .laywer-profile form-group label {
+    @apply transform transition-all duration-200;
+  }
+  
+  laywer-profile .form-group:focus-within label {
+    @apply text-indigo-600;
+  }
+}

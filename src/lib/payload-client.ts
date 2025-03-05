@@ -1,78 +1,82 @@
 const SERVER_URL = process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'
 
-interface PayloadClientOptions {
-  collection: string;
-  data?: Record<string, any>;
-  depth?: number;
+async function fetchWithError(url: string, options: RequestInit = {}) {
+  const response = await fetch(url, options)
+  const data = await response.json()
+  
+  if (!response.ok) {
+    throw new Error(data.message || 'An error occurred')
+  }
+  
+  return data
 }
 
 export const payloadClient = {
-  async login({ collection, data }: PayloadClientOptions) {
-    console.log('Attempting login with:', { collection, data });
-    const response = await fetch(`${SERVER_URL}/api/${collection}/login`, {
+  async login({ collection, data }: { collection: string; data: any }) {
+    return fetchWithError(`${SERVER_URL}/api/${collection}/login`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
+      credentials: 'include',
     })
-    
-    const result = await response.json()
-    console.log('Login response:', result);
-    
-    if (!response.ok) {
-      throw new Error(result.errors?.[0]?.message || 'Login failed')
-    }
-    
-    return result
   },
 
-  async create({ collection, data }: PayloadClientOptions) {
-    console.log('Creating:', { collection, data });
-    const response = await fetch(`${SERVER_URL}/api/${collection}`, {
+  async logout() {
+    document.cookie = 'regular-user-token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;'
+    return fetchWithError(`${SERVER_URL}/api/regular-users/logout`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       credentials: 'include',
+    })
+  },
+
+  async me({ collection }: { collection: string }) {
+    return fetchWithError(`${SERVER_URL}/api/${collection}/me`, {
+      credentials: 'include',
+    })
+  },
+
+  async regularLogin(data: { email: string; password: string }) {
+    return fetchWithError(`${SERVER_URL}/api/regular-users/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
-    })
-    
-    const result = await response.json()
-    console.log('Create response:', result);
-    
-    if (!response.ok) {
-      throw new Error(result.errors?.[0]?.message || 'Creation failed')
-    }
-    
-    return result
-  },
-
-  async me({ collection }: PayloadClientOptions) {
-    const response = await fetch(`${SERVER_URL}/api/${collection}/me`, {
       credentials: 'include',
     })
-
-    if (response.status === 401) {
-      return { user: null }
-    }
-    
-    const result = await response.json()
-    
-    if (!response.ok) {
-      throw new Error(result.errors?.[0]?.message || 'Failed to fetch user')
-    }
-    
-    return result
   },
 
-  async logout({ collection }: PayloadClientOptions) {
-    const response = await fetch(`${SERVER_URL}/api/${collection}/logout`, {
+  async regularLogout() {
+    return fetchWithError(`${SERVER_URL}/api/regular-users/logout`, {
       method: 'POST',
       credentials: 'include',
     })
-    
-    return response.json()
   },
+
+  async regularMe() {
+    return fetchWithError(`${SERVER_URL}/api/regular-users/regular-me`, {
+      credentials: 'include',
+    })
+  },
+
+  async create({ collection, data }: { collection: string; data: any }) {
+    return fetchWithError(`${SERVER_URL}/api/${collection}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      credentials: 'include',
+    })
+  },
+
+  async regularRegister(data: { fullName: string; email: string; password: string }) {
+    return fetchWithError(`${SERVER_URL}/api/regular-users`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+        role: 'user',
+      }),
+      credentials: 'include',
+    })
+  }
 }

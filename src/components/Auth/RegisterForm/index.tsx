@@ -24,16 +24,14 @@ export const RegisterForm = () => {
 
     try {
       console.log('Attempting registration...')
-      const response = await payloadClient.create({
-        collection: 'regular-users',
-        data: {
-          fullName: formData.fullName,
-          email: formData.email,
-          password: formData.password,
-        },
+      const response = await payloadClient.regularRegister({
+        fullName: formData.fullName,
+        email: formData.email,
+        password: formData.password,
       })
+      
       console.log('Registration successful:', response)
-      router.push('/register')
+      router.push('/login')
     } catch (err) {
       console.error('Registration error:', err)
       setError(err instanceof Error ? err.message : 'Registration failed. Please try again.')

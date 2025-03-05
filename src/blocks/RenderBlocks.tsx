@@ -8,7 +8,8 @@ import { ContentBlock } from '@/blocks/Content/Component'
 import { FormBlock } from '@/blocks/Form/Component'
 import { MediaBlock } from '@/blocks/MediaBlock/Component'
 import { SearchLawyerBlock } from '@/blocks/SearchLawyerBlock/Component'
-import { LoginSignupBlock } from '@/blocks/LoginSignup/Component'
+import { RegularUserLoginBlock } from '@/blocks/RegularUserAuth/Login/LoginBlock'
+import { RegularUserRegisterBlock } from '@/blocks/RegularUserAuth/Register/RegisterBlock'
 
 const blockComponents = {
   archive: ArchiveBlock,
@@ -17,7 +18,8 @@ const blockComponents = {
   formBlock: FormBlock,
   mediaBlock: MediaBlock,
   searchLawyerBlock: SearchLawyerBlock,
-  loginSignup: LoginSignupBlock,
+  regularUserLogin: RegularUserLoginBlock,
+  regularUserRegister: RegularUserRegisterBlock,
 }
 
 export const RenderBlocks: React.FC<{

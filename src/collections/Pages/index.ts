@@ -8,7 +8,8 @@ import { Content } from '../../blocks/Content/config'
 import { FormBlock } from '../../blocks/Form/config'
 import { MediaBlock } from '../../blocks/MediaBlock/config'
 import { SearchLawyerBlock } from '../../blocks/SearchLawyerBlock/config'
-import { LoginSignup } from '../../blocks/LoginSignup/config'
+import { RegularUserLogin } from '../../blocks/RegularUserAuth/Login/config'
+import { RegularUserRegister } from '../../blocks/RegularUserAuth/Register/config'
 import { hero } from '@/heros/config'
 import { slugField } from '@/fields/slug'
 import { populatePublishedAt } from '../../hooks/populatePublishedAt'
@@ -77,7 +78,16 @@ export const Pages: CollectionConfig<'pages'> = {
             {
               name: 'layout',
               type: 'blocks',
-              blocks: [CallToAction, Content, MediaBlock, Archive, FormBlock, SearchLawyerBlock, LoginSignup],
+              blocks: [
+                CallToAction, 
+                Content, 
+                MediaBlock, 
+                Archive, 
+                FormBlock, 
+                SearchLawyerBlock, 
+                RegularUserLogin,    // Added new login block
+                RegularUserRegister  // Added new register block
+              ],
               required: true,
               admin: {
                 initCollapsed: true,
